@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">cowcam</string>
+    <string name="round" />
+    <string name="flash" />
+    <string name="capture" />
+    <string name="CowGrid" />
+</resources>
