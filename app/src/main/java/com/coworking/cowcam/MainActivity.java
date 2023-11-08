@@ -116,7 +116,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void takePicture(ImageCapture imageCapture) {
-        final File file = new File(getExternalFilesDir(null), System.currentTimeMillis() + ".jpg");
+        final File refFile = new File("/storage/emulated/0/DCIM/Cowcam/");
+        refFile.mkdir();
+        final File file = new File(refFile, System.currentTimeMillis() + ".jpg");
         ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(file).build();
         imageCapture.takePicture(outputFileOptions, Executors.newCachedThreadPool(), new ImageCapture.OnImageSavedCallback() {
             @Override
