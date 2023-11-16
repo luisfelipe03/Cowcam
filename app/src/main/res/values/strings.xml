@@ -4,4 +4,6 @@
     <string name="flash" />
     <string name="capture" />
     <string name="CowGrid" />
+    <string name="Câmera" />
+    <string name="c_mera">Câmera</string>
 </resources>
