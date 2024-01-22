@@ -2,9 +2,15 @@ package com.coworking.cowcam;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
@@ -33,7 +39,10 @@ public class CamActivity extends AppCompatActivity {
     private PreviewView previewView;
     int cameraFacing = CameraSelector.LENS_FACING_BACK;
 
+    private SensorManager mSensorManager;
 
+    private SensorEventListenerImpl sensorEventListenerImpl;
+    private Sensor sensor;
     private final ActivityResultLauncher<String> activityResultLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
         @Override
         public void onActivityResult(Boolean result) {
@@ -51,6 +60,11 @@ public class CamActivity extends AppCompatActivity {
         capture = findViewById(R.id.capture);
         toggleFlash = findViewById(R.id.toggleFlash);
         flipCamera = findViewById(R.id.flipCamera);
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
+        sensorEventListenerImpl = new SensorEventListenerImpl();
+        mSensorManager.registerListener(sensorEventListenerImpl, sensor,  9_999_999);
 
         if (ContextCompat.checkSelfPermission(CamActivity.this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             activityResultLauncher.launch(android.Manifest.permission.CAMERA);
@@ -171,5 +185,45 @@ public class CamActivity extends AppCompatActivity {
             return AspectRatio.RATIO_4_3;
         }
         return AspectRatio.RATIO_16_9;
+    }
+
+    public class SensorEventListenerImpl implements SensorEventListener {
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+                float[] mRotationMatrix = new float[9];
+                SensorManager.getRotationMatrixFromVector(mRotationMatrix, event.values);
+
+                float[] orientationValues = new float[3];
+                SensorManager.getOrientation(mRotationMatrix, orientationValues);
+
+                float X = (float) Math.toDegrees(orientationValues[1]);
+                float Y = (float) Math.toDegrees(orientationValues[2]);
+                float Z = (float) Math.toDegrees(orientationValues[0]);
+
+                if ((Math.abs(X + 90) < 10) && (Math.abs(Y) < 25)) {
+                    updateOverlayImage(R.drawable.mask_green);
+                } else {
+                    updateOverlayImage(R.drawable.mask_red);
+                }
+
+                Log.i("", "Inclinação Eixo X ---------" + String.valueOf(X));
+                Log.i("","Inclinação Eixo Y ----------" + String.valueOf(Y));
+                Log.i("", "Azimute -------------------" + String.valueOf(Z));
+
+
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    }
+
+    private void updateOverlayImage(int drawableResId) {
+        ImageView overlayImage = findViewById(R.id.imageMask);
+        overlayImage.setImageResource(drawableResId);
     }
 }

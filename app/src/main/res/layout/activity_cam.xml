@@ -14,9 +14,10 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/vaca2"
+        android:src="@drawable/mask_green"
         android:contentDescription="@string/CowGrid"
-        android:scaleType="fitXY" />
+        android:scaleType="fitXY"
+        android:id="@+id/imageMask" />
 
     <ImageButton
         android:layout_width="60sp"
